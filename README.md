@@ -60,16 +60,13 @@ source venv/bin/activate
 
 ## Instalando depedências
 
-```bash
 pip install -r requirements.txt
 
 ## Rodando
 
-```bash
 uvicorn main:app --reload
 
 ## Chamada para gerar embedding
 
-```bash
 curl -X POST "http://localhost:8000/embed" -H "Content-Type: application/json" -d '{"text": "Teste de embeddisdang"}'
 
