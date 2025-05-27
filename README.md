@@ -29,7 +29,7 @@ Este projeto oferece uma API REST construída com FastAPI para gerar embeddings 
 
 ## Requisitos
 
-- Python 3.8+
+- Python 3.2+
 - pacotes:
   - fastapi
   - uvicorn
@@ -43,7 +43,7 @@ Este projeto oferece uma API REST construída com FastAPI para gerar embeddings 
 
 ## Configurando ambiente com `venv`
 
-Recomendamos usar um ambiente virtual para isolar as dependências do projeto:
+Recomendo usar um ambiente virtual para isolar as dependências do projeto:
 
 ```bash
 # Criar ambiente virtual
@@ -57,3 +57,19 @@ source venv/bin/activate
 
 # Ativar ambiente virtual (Windows CMD)
 .\venv\Scripts\activate.bat
+
+## Instalando depedências
+
+```bash
+pip install -r requirements.txt
+
+## Rodando
+
+```bash
+uvicorn main:app --reload
+
+## Chamada para gerar embedding
+
+```bash
+curl -X POST "http://localhost:8000/embed" -H "Content-Type: application/json" -d '{"text": "Teste de embeddisdang"}'
+
