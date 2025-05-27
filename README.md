@@ -39,6 +39,7 @@ Este projeto oferece uma API REST construída com FastAPI para gerar embeddings 
   - onnxruntime
   - numpy
   - pydantic
+  - onnx
 
 ---
 

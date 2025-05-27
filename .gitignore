@@ -24,3 +24,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/python-service/.venv
+/python-service/onnx
+/python-service/__pycache__
