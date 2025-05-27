@@ -16,6 +16,7 @@ Este projeto oferece uma API REST construída com FastAPI para gerar embeddings 
 - Quantização do modelo ONNX para melhoria de desempenho.
 - API para geração de embeddings via requisição HTTP.
 - Pooling mean aplicado na saída do modelo para vetor fixo.
+- Aplicação simples em Laravel + Qdrant criando e salvando vetores.
 
 ---
 
