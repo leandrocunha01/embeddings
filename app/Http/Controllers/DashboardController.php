@@ -15,16 +15,16 @@ class DashboardController extends Controller
 {
     public function index(Request $request): Response
     {
-        $query = Product::query();
+        /*$query = Product::query();
 
         if ($request->filled('search')) {
             $query->whereIn('id', $this->embedding($request->input('search')));
         }
 
-        $products = $query->get();
+        $products = $query->get();*/
 
         return Inertia::render('Dashboard', [
-            'products' => $products,
+            'products' => $this->embedding($request->input('search')),
             'filters' => $request->only('search'),
         ]);
     }
@@ -32,7 +32,7 @@ class DashboardController extends Controller
     protected function embedding(string $product): array
     {
         $response = Http::post('http://127.0.0.1:8000/embed',
-            ['text' => "$product"]
+            ['text' => "query: $product"]
         );
 
         $data = $response->object();
@@ -47,7 +47,7 @@ class DashboardController extends Controller
         foreach ($response['result'] as $value) {
             $ret[] = $value['payload']['id'];
         }
-        return $ret;
+        return $response['result'];
     }
 
 }

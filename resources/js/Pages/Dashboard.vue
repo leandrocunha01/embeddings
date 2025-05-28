@@ -18,8 +18,9 @@
                 :key="product.id"
                 class="border p-2 rounded"
             >
-                <h2 class="font-bold">{{ product.name }}</h2>
-                <p>{{ product.description }}</p>
+                <h2 class="font-bold">{{ product.payload.name }}</h2>
+                <p>{{ product.payload.description }}</p>
+                <p>{{ product.score }}</p>
             </li>
         </ul>
     </div>

@@ -41,9 +41,8 @@ class GenerateAndSaveEmbeddings extends Command
         Product::query()->chunk(100, function ($products) use ($client) {
             $points = new PointsStruct();
             foreach ($products as $product) {
-                $cleanString = str_replace(["\n", "\r"], '', $product->description);
                 $response = Http::post('http://127.0.0.1:8000/embed',
-                    ['text' => "$product->name"]
+                    ['text' => "passage: $product->description"]
                 );
 
                 $data = $response->object();
