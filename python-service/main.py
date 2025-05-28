@@ -14,8 +14,7 @@ try:
     print(f"✅ Modelo ONNX e Tokenizer carregados com sucesso de: {ONNX_MODEL_PATH}")
 except Exception as e:
     print(f"❌ Erro ao carregar o modelo ou tokenizer: {e}")
-    # Em um ambiente de produção, você pode querer encerrar a aplicação aqui
-    # ou ter um mecanismo de fallback. Para desenvolvimento, um print é suficiente.
+    print(f"⚠️ Rode: python quantize_model.py")
     raise RuntimeError(f"Falha ao inicializar a aplicação: {e}")
 
 # --- Definição da Aplicação FastAPI ---
@@ -41,13 +40,14 @@ def embed_text(request: TextRequest):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="O texto não pode ser vazio ou conter apenas espaços."
         )
+
     input_text = "query: " + request.text
 
     inputs = tokenizer(
         input_text,
         return_tensors="np",
-        padding=True, # Adiciona padding para lotes, embora aqui seja um item por vez
-        truncation=True # Trunca textos muito longos para o tamanho máximo do modelo
+        padding=True,
+        truncation=True
     )
 
     try:
@@ -60,6 +60,12 @@ def embed_text(request: TextRequest):
 
     # Pooling mean para gerar vetor fixo
     embedding = outputs.last_hidden_state.mean(axis=1)[0]
+
+    # Normalização L2
+    norm = np.linalg.norm(embedding)
+    if norm > 0:
+        embedding = embedding / norm
+
     embedding_list = embedding.tolist()
 
     return {
