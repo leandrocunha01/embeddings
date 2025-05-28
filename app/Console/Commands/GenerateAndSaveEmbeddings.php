@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Facades\Qdrant;
-use App\Models\Exams;
+use App\Models\Product;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Qdrant\Models\PointsStruct;
@@ -34,34 +34,34 @@ class GenerateAndSaveEmbeddings extends Command
     public function handle()
     {
         $client = Qdrant::getClient();
-        // $createCollection = new CreateCollection();
-        // $createCollection->addVector(new VectorParams(384, VectorParams::DISTANCE_COSINE), 'exams');
-        // $response = $client->collections('exams')->create($createCollection);
-
-        Exams::query()->chunk(100, function ($exams) use ($client) {
+        #$createCollection = new CreateCollection();
+        #$createCollection->addVector(new VectorParams(384, VectorParams::DISTANCE_COSINE), 'product');
+        #$response = $client->collections('products')->create($createCollection);
+        #dd($response);
+        Product::query()->chunk(100, function ($products) use ($client) {
             $points = new PointsStruct();
-            foreach ($exams as $exam) {
-                $cleanString = str_replace(["\n", "\r"], '', $exam->interpretation);
+            foreach ($products as $product) {
+                $cleanString = str_replace(["\n", "\r"], '', $product->description);
                 $response = Http::post('http://127.0.0.1:8000/embed',
-                    ['text' => "$exam->name; $cleanString"]
+                    ['text' => "$product->name"]
                 );
 
                 $data = $response->object();
 
                 $points->addPoint(
                     new PointStruct(
-                        (int)$exam->id,
-                        new VectorStruct($data->embedding, 'exams'),
+                        (int)$product->id,
+                        new VectorStruct($data->embedding, 'product'),
                         [
-                            'id' => $exam->id,
-                            'name' => $exam->name,
-                            'interpretation' => $exam->interpretation,
+                            'id' => $product->id,
+                            'name' => $product->name,
+                            'description' => $product->description,
                         ]
                     )
                 );
             }
             try {
-                $client->collections('exams')->points()->upsert($points);
+                $client->collections('products')->points()->upsert($points);
             }catch (\Exception $e) {
                 echo $e->getMessage();
             }
