@@ -7,6 +7,18 @@
                 placeholder="Buscar produto..."
                 class="input"
             />
+
+            <select v-model="filters.category" class="select">
+                <option value="">Todas as categorias</option>
+                <option
+                    v-for="category in categories"
+                    :key="category.id"
+                    :value="category.id"
+                >
+                    {{ category.name }}
+                </option>
+            </select>
+
             <button type="submit" class="button">
                 Buscar
             </button>
@@ -29,8 +41,17 @@ import { router, usePage } from '@inertiajs/vue3'
 const { props } = usePage()
 const products = ref(props.products || [])
 
+// Categorias com id e name
+const categories = ref([
+    { id: 1, name: 'Carros' },
+    { id: 2, name: 'Frutas' },
+    { id: 3, name: 'Celulares' },
+    { id: 4, name: 'Físicos famosos' }
+])
+
 const filters = ref({
-    search: props.filters?.search || ''
+    search: props.filters?.search || '',
+    category: props.filters?.category || ''
 })
 
 function search() {
@@ -49,9 +70,10 @@ function search() {
     display: flex;
     gap: 20px;
     margin-bottom: 30px;
+    flex-wrap: wrap;
 }
 
-.input {
+.input, .select {
     flex: 1;
     padding: 16px;
     border: 1px solid #ccc;

@@ -41,7 +41,7 @@ def embed_text(request: TextRequest):
             detail="O texto não pode ser vazio ou conter apenas espaços."
         )
 
-    input_text = "query: " + request.text
+    input_text = request.text
 
     inputs = tokenizer(
         input_text,
