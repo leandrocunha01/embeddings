@@ -22,9 +22,14 @@ class DashboardController extends Controller
         }
 
         $products = $query->get();*/
+        $searchTerm = $request->input('search');
+        $products = null;
+        if($searchTerm) {
+            $products = $this->embedding($searchTerm);
+        }
 
         return Inertia::render('Dashboard', [
-            'products' => $this->embedding($request->input('search')),
+            'products' => $products,
             'filters' => $request->only('search'),
         ]);
     }
