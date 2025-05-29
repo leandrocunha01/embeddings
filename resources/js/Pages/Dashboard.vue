@@ -23,10 +23,10 @@
 </template>
 
 <script setup>
-import {reactive, ref} from 'vue'
-import {router, usePage} from '@inertiajs/vue3'
+import { reactive, ref } from 'vue'
+import { router, usePage } from '@inertiajs/vue3'
 
-const {props} = usePage()
+const { props } = usePage()
 const products = ref(props.products || [])
 
 const filters = ref({
@@ -40,31 +40,32 @@ function search() {
 
 <style>
 .container {
-    padding: 20px;
-    max-width: 600px;
+    padding: 40px;
+    max-width: 800px;
     margin: 0 auto;
 }
 
 .form {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 20px;
+    margin-bottom: 30px;
 }
 
 .input {
     flex: 1;
-    padding: 10px;
+    padding: 16px;
     border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 14px;
+    border-radius: 12px;
+    font-size: 18px;
 }
 
 .button {
-    padding: 10px 20px;
+    padding: 16px 32px;
     background-color: #007bff;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     color: white;
+    font-size: 18px;
     font-weight: bold;
     cursor: pointer;
 }
@@ -81,29 +82,30 @@ function search() {
 
 .product-card {
     border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 20px;
     transition: box-shadow 0.3s;
 }
 
 .product-card:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .product-title {
-    font-size: 18px;
+    font-size: 24px;
     font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
 }
 
 .product-description {
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     color: #555;
+    font-size: 16px;
 }
 
 .product-score {
-    font-size: 12px;
+    font-size: 14px;
     color: #999;
 }
 </style>
