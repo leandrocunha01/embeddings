@@ -3,10 +3,12 @@ from optimum.onnxruntime.configuration import AutoQuantizationConfig # Importe A
 from transformers import AutoTokenizer
 import os
 
+model_name =  os.getenv('MODEL_NAME', 'multilingual-e5-small')
+
 # Passo 1: Defina o modelo e caminhos
-model_id = "intfloat/multilingual-e5-small"
-onnx_path = "onnx/e5-small"
-quantized_path = "onnx/e5-small-quantized"
+model_id = f"intfloat/{model_name}"
+onnx_path = f"onnx/{model_name}"
+quantized_path = f"onnx/{model_name}-quantized"
 
 # Crie os diretórios se eles não existirem
 os.makedirs(onnx_path, exist_ok=True)
