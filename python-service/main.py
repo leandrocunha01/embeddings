@@ -1,12 +1,12 @@
 import os
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
-from typing import List, Optional
 from transformers import AutoTokenizer
 from optimum.onnxruntime import ORTModelForFeatureExtraction
 import numpy as np
 
 model_name = os.getenv('MODEL_NAME', 'multilingual-e5-small')
+
 ONNX_MODEL_PATH = f"./onnx/{model_name}"
 MODEL_ID = os.getenv("MODEL_ID", f"intfloat/{model_name}")
 
@@ -24,84 +24,52 @@ app = FastAPI(
     description=f"API para gerar embeddings de texto usando o modelo {model_name} (ONNX quantizado)."
 )
 
-# Função para criar input instruct
-def get_detailed_instruct(task_description: str, query: str) -> str:
-    return f'Instruct: {task_description}\nQuery: {query}'
-
-# Modelos Pydantic
-class TextListRequest(BaseModel):
-    texts: List[str]
-    use_instruct: Optional[bool] = False
-    task_description: Optional[str] = "Given a query, retrieve relevant documents"
 
 class TextRequest(BaseModel):
     text: str
-    use_instruct: Optional[bool] = False
-    task_description: Optional[str] = "Given a query, retrieve relevant documents"
 
-# Função de embedding
-def generate_embedding(text: str) -> List[float]:
-    inputs = tokenizer(text, return_tensors="np", padding=True, truncation=True)
-    outputs = model(**inputs)
-    embedding = outputs.last_hidden_state.mean(axis=1)[0]
-    norm = np.linalg.norm(embedding)
-    if norm > 0:
-        embedding = embedding / norm
-    return embedding.tolist()
 
 @app.post(
     "/embed",
-    summary="Gera embeddings para armazenamento",
-    response_description="Lista de embeddings gerados e suas dimensões",
+    summary="Gera embeddings de texto",
+    response_description="O embedding gerado e sua dimensão",
     status_code=status.HTTP_200_OK
 )
-def embed_texts(request: TextListRequest):
-    if not request.texts:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A lista de textos não pode estar vazia."
-        )
-
-    embeddings = []
-    for text in request.texts:
-        if not text or not text.strip():
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cada texto deve ser não vazio."
-            )
-
-        # Se for "Instruct Mode", formata
-        if request.use_instruct:
-            text = get_detailed_instruct(request.task_description, text)
-
-        embedding = generate_embedding(text)
-        embeddings.append({
-            "embedding": embedding,
-            "dimension": len(embedding)
-        })
-
-    return {"results": embeddings}
-
-@app.post(
-    "/embed_query",
-    summary="Gera embedding de query para busca vetorial",
-    response_description="Embedding da query e sua dimensão",
-    status_code=status.HTTP_200_OK
-)
-def embed_query(request: TextRequest):
+def embed_text(request: TextRequest):
     if not request.text or not request.text.strip():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="O texto da query não pode ser vazio ou conter apenas espaços."
+            detail="O texto não pode ser vazio ou conter apenas espaços."
         )
 
-    text = request.text
-    if request.use_instruct:
-        text = get_detailed_instruct(request.task_description, text)
+    input_text = request.text
 
-    embedding = generate_embedding(text)
+    inputs = tokenizer(
+        input_text,
+        return_tensors="np",
+        padding=True,
+        truncation=True
+    )
+
+    try:
+        outputs = model(**inputs)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro durante a inferência do modelo: {e}"
+        )
+
+    # Pooling mean para gerar vetor fixo
+    embedding = outputs.last_hidden_state.mean(axis=1)[0]
+
+    # Normalização L2
+    norm = np.linalg.norm(embedding)
+    if norm > 0:
+        embedding = embedding / norm
+
+    embedding_list = embedding.tolist()
 
     return {
-        "embedding": embedding,
-        "dimension": len(embedding)
+        "embedding": embedding_list,
+        "dimension": len(embedding_list)
     }

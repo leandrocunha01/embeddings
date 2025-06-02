@@ -4,9 +4,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "text": "Como cozinhar arroz?",
-    "use_instruct": true,
-    "task_description": "Given a cooking question, retrieve helpful recipes"
+    "text": "Query: Como cozinhar arroz?"
 }
 
 ###
