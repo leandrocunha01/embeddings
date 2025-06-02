@@ -5,10 +5,10 @@ from transformers import AutoTokenizer
 from optimum.onnxruntime import ORTModelForFeatureExtraction
 import numpy as np
 
-model_name = os.getenv('MODEL_NAME', 'multilingual-e5-small')
+model_name = os.getenv('MODEL_NAME', 'intfloat/multilingual-e5-small')
 
 ONNX_MODEL_PATH = f"./onnx/{model_name}"
-MODEL_ID = os.getenv("MODEL_ID", f"intfloat/{model_name}")
+MODEL_ID = os.getenv("MODEL_ID", f"{model_name}")
 
 try:
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
