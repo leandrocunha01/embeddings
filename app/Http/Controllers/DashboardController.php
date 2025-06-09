@@ -3,13 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Facades\Qdrant;
-use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 use Inertia\Response;
 use Qdrant\Models\Filter\Condition\MatchInt;
-use Qdrant\Models\Filter\Condition\MatchString;
 use Qdrant\Models\Filter\Filter;
 use Qdrant\Models\Request\SearchRequest;
 use Qdrant\Models\VectorStruct;
@@ -18,19 +16,9 @@ class DashboardController extends Controller
 {
     public function index(Request $request): Response
     {
-        /*$query = Product::query();
-
-        if ($request->filled('search')) {
-            $query->whereIn('id', $this->embedding($request->input('search')));
-        }
-
-        $products = $query->get();*/
         $searchTerm = $request->input('search');
         $category = (int)$request->input('category');
-        $products = null;
-        if ($searchTerm) {
-            $products = $this->embedding($searchTerm, $category);
-        }
+        $products = $searchTerm ? $this->searchEmbedding('products', 'product', $searchTerm, 5, $category) : null;
 
         return Inertia::render('Dashboard', [
             'products' => $products,
@@ -38,36 +26,49 @@ class DashboardController extends Controller
         ]);
     }
 
-    protected function embedding(string $product, $category): array
+    public function classify(Request $request): Response
     {
-        $response = Http::post('http://127.0.0.1:8000/embed',
-            ['text' => "query: $product"]
-        );
+        $searchTerm = $request->input('search');
+        $categories = $searchTerm ? $this->searchEmbedding('categories', 'category', $searchTerm, 1) : null;
 
-        $data = $response->object();
-        $qdrant = Qdrant::getClient();
-        $searchRequest = (new SearchRequest(new VectorStruct($data->embedding, 'product')))
-            ->setLimit(5)
+        return Inertia::render('Classify', [
+            'categories' => $categories,
+            'filters' => $request->only(['search', 'category']),
+        ]);
+    }
+
+    protected function getEmbedding(string $text): array
+    {
+        $response = Http::post('http://127.0.0.1:8000/embed', [
+            'text' => "query: $text"
+        ]);
+
+        return $response->object()->embedding ?? [];
+    }
+
+    protected function searchEmbedding(string $collection, string $vectorName, string $query, int $limit, ?int $category = null): array
+    {
+        $embedding = $this->getEmbedding($query);
+
+        $searchRequest = (new SearchRequest(new VectorStruct($embedding, $vectorName)))
+            ->setLimit($limit)
             ->setParams([
                 'hnsw_ef' => 128,
                 'exact' => false,
             ])
             ->setWithPayload(true);
-        if ($category) {
+
+        if ($category && $collection === 'products') {
             $searchRequest->setFilter(
                 (new Filter())->addShould(
-                    new MatchInt('category', (int)$category)
+                    new MatchInt('category', $category)
                 )
             );
         }
 
-        $response = $qdrant->collections('products')->points()->search($searchRequest);
-        $ret = [];
-        foreach ($response['result'] as $value) {
-            $ret[] = $value['payload']['id'];
-        }
-        return $response['result'];
+        $qdrant = Qdrant::getClient();
+        $response = $qdrant->collections($collection)->points()->search($searchRequest);
+
+        return $response['result'] ?? [];
     }
-
 }
-
