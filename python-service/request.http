@@ -1,8 +1,0 @@
-### GET request to example server
-POST  http://127.0.0.1:8000/embed
-Content-Type: application/json
-Accept: application/json
-
-{
-    "text": "Query: Como cozinhar arroz?"
-}

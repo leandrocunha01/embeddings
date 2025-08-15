@@ -1,8 +1,0 @@
-fastapi
-uvicorn
-transformers
-optimum
-onnxruntime
-numpy
-pydantic
-onnx
